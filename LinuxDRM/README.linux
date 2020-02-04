@@ -1,0 +1,20 @@
+OpenGL ES 2.0 Programming Guide - Example code for Linux/DRM environment
+
+Adaptation code for Linux/DRM environment for the examples of the book
+OpenGL ES 2.0 Programming Guide. All
+original example code has remained unmodified. Adaptation changes are
+in esUtil.c|h files, which encapsulates all Linux DRM specific internals from
+the application layer.
+
+The Linux DRM specific code is a minor adaptation of the canonical kmscube example:
+https://github.com/robclark/kmscube.git
+
+Prerequisites for building the source is a valid GCC toolchain 
+and a properly setup libDRM & GLESv2 & EGL environment.
+
+The code has been tested on a Raspberry Pi 4 running Raspbian GNU/Linux 10 (buster) 
+
+Compiling the examples should be as easy as running "make" in the root
+LinuxDRM directory.
+
+1 Feb 2020 Geoff Ericksson <drgeoffathome@gmail.com>
