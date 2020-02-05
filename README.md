@@ -1,3 +1,7 @@
+# Pre-Introduction
+
+This repository is a fork of the official samples repository with support for the LinuxDRM platform.
+
 # Introduction #
 
 If you are looking for the OpenGL ES 3.0 Programming Guide sample code, you can find it at http://github.com/danginsburg/opengles3-book/ . This repo contains the sample code from the OpenGL ES 2.0 Programming Guide.  This was originally hosted on Google Code, but was migrated to GitHub due to the shutdown.  The build instructions are provided below.  This information is likely to be quite out-of-date.  Please see http://github.com/danginsburg/opengles3-book/ for more recent updates.
@@ -101,7 +105,7 @@ To build the code using Android SDK API 8 (or greater), in Eclipse:
 
 That's it.  You should then be able to run on an Android 2.2-device (I have tested them only on the Motorola DroidX, let me know if there are problems on your device).
 
-# Linux #
+# Linux X11#
 The Linux versions of the examples have been tested to run against Ubuntu Linux 11.04, 11.11 and Fedora Linux 15. Before trying to compile the source make sure the development environment is set up correctly. To do so, run these commands based on your operating system:
 
 Ubuntu 11.04/11.11:
@@ -133,6 +137,17 @@ The examples have been test driven with following configurations:
   * ATI Radeon HD 3200 graphics with Mesa 7.11-0ubuntu3, Ubuntu 11.10
   * NVidia Quadro FX 2800M/PCI/SSE2 with Mesa 7.11-0ubuntu3, Ubuntu 11.10
   * NVidia Tegra 2, native EGL/GLESv2 drivers, Ubuntu 11.04
+
+# Linux DRM #
+This version has only been tested on the Raspberry Pi 4 but should in principle work on any GNU/Linux system _not_ running X11 or Wayland.
+
+## Building for Linux/DRM ##
+Once the development environment is setup, compiling of the examples is done using the included Makefile. Type:
+
+```
+cd LinuxDRM
+make
+```
 
 
 # Blackberry #
