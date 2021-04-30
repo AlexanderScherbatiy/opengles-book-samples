@@ -44,7 +44,7 @@ static const struct drm *drm;  // actual object is a static variable in drm-lega
 //
 EGLBoolean WinCreate(ESContext *esContext, const char *title)
 {
-    const char *device = "/dev/dri/card1";
+    const char *device = "/dev/dri/card0";
     drm = init_drm_legacy(device, "", 0);
     if (!drm) {
         printf("Failed to initialize DRM %s\n", device);
