@@ -37,6 +37,64 @@ static struct egl egl;   // TODO: This egl is basically an ESContext.  Need to t
 static const struct gbm *gbm;  // actual object is a static variable in common.c
 static const struct drm *drm;  // actual object is a static variable in drm-legacy.c
 
+typedef struct {
+    uint32_t crtc_id;
+    struct gbm_bo *bo;
+    uint32_t bo_handle;
+    int x, y;
+} DRM_CURSOR;
+
+static DRM_CURSOR *drm_create_cursor(int drmFd, struct gbm_device *gbmDevice, uint32_t crtc_id) 
+{
+    int w = 16;
+    int h = 16;
+    DRM_CURSOR * c = calloc(1, sizeof(DRM_CURSOR));
+    uint32_t buf[w * h];
+    int ret;
+
+    c->crtc_id = crtc_id;
+    c->bo = gbm_bo_create(gbmDevice, w, h, 
+                          GBM_FORMAT_ARGB8888,
+                          GBM_BO_USE_CURSOR_64X64 | GBM_BO_USE_WRITE);
+    if(  NULL == c->bo )
+    {
+        printf("Failed to create gbm_bo\n");
+        return NULL;
+    }
+    c->bo_handle = gbm_bo_get_handle(c->bo).u32;
+
+    memset(buf, 255, sizeof buf); // white for now
+    if ( gbm_bo_write(c->bo, buf, sizeof(buf)) < 0 ) {
+        printf("Failed to write gbm_bo\n");
+        return NULL;
+    }
+    ret = drmModeSetCursor(drmFd, c->crtc_id, c->bo_handle, w, h);
+    if ( ret )
+    {
+        printf("Failed to set cursor mode: %d %s\n"), ret, strerror(errno);
+        return NULL;
+    }
+
+    return c;
+}
+
+static int drm_move_cursor(int drmFd, DRM_CURSOR *c, int x, int y) 
+{
+	int ret;
+
+    if ( c->x != x || c->y != y )
+    {
+        c->x = x;
+        c->y = y;
+        ret = drmModeMoveCursor(drmFd, c->crtc_id, x, y);
+        if( ret ) {
+            printf("Failed to move cursor: %d %s\n"), ret, strerror(errno);
+            return ret;
+        }
+    }
+    return 0;
+}
+
 ///
 //  WinCreate()
 //
@@ -44,9 +102,15 @@ static const struct drm *drm;  // actual object is a static variable in drm-lega
 //
 EGLBoolean WinCreate(ESContext *esContext, const char *title)
 {
-    const char *device = "/dev/dri/card1";
+    char* device = getenv("DRI_CARD");
+    if (!device)
+    {
+        device = "/dev/dri/card0";
+    }
+    printf("Used dri card: %s\n", device);
     drm = init_drm_legacy(device, "", 0);
-    if (!drm) {
+    if (!drm)
+    {
         printf("Failed to initialize DRM %s\n", device);
         return EGL_FALSE;
     }
@@ -56,10 +120,18 @@ EGLBoolean WinCreate(ESContext *esContext, const char *title)
 
     printf("Try to init gbm with fd=%i, h=%i v=%i\n", drm->fd, drm->mode->hdisplay, drm->mode->vdisplay);
     gbm = init_gbm(drm->fd, drm->mode->hdisplay, drm->mode->vdisplay, format, modifier);
-	if (!gbm) {
+	if (!gbm)
+	{
         printf("Failed to initialize GBM\n");
         return EGL_FALSE;
 	}
+
+    DRM_CURSOR * cursor = NULL;
+    int cursorX=200;
+    int cursorY=200;
+
+    cursor = drm_create_cursor(drm->fd, gbm->dev, drm->crtc_id);
+    drm_move_cursor(drm->fd, cursor, cursorX, cursorY);
 
     if (init_egl(&egl, gbm, 0))
     {
